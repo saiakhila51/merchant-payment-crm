@@ -1,0 +1,100 @@
+<template>
+    <lightning-card title="New Payment Request" icon-name="standard:payment_gateway">
+
+        <div class="form-container">
+
+            <!-- ─── MERCHANT INFO HEADER ─── -->
+            <template if:true={merchantId}>
+                <div class="merchant-badge">
+                    <lightning-icon
+                        icon-name="standard:merchant"
+                        size="small">
+                    </lightning-icon>
+                    <span>Creating request for merchant</span>
+                </div>
+            </template>
+
+            <!-- ─── FORM FIELDS ─── -->
+            <div class="form-grid">
+
+                <!-- Amount -->
+                <lightning-input
+                    type="number"
+                    label="Payment Amount (₹)"
+                    value={formData.amount}
+                    min="1"
+                    step="0.01"
+                    required
+                    onchange={handleFieldChange}
+                    data-field="amount"
+                    class="form-field">
+                </lightning-input>
+
+                <!-- Due Date -->
+                <lightning-input
+                    type="date"
+                    label="Due Date"
+                    value={formData.dueDate}
+                    min={today}
+                    required
+                    onchange={handleFieldChange}
+                    data-field="dueDate"
+                    class="form-field">
+                </lightning-input>
+
+                <!-- Customer Dropdown -->
+                <lightning-combobox
+                    label="Customer"
+                    value={formData.customerId}
+                    options={customerOptions}
+                    onchange={handleFieldChange}
+                    data-field="customerId"
+                    placeholder="Select customer..."
+                    class="form-field">
+                </lightning-combobox>
+
+                <!-- Description -->
+                <lightning-textarea
+                    label="Description (Optional)"
+                    value={formData.description}
+                    onchange={handleFieldChange}
+                    data-field="description"
+                    max-length="255"
+                    class="form-field full-width">
+                </lightning-textarea>
+
+            </div>
+
+            <!-- ─── VALIDATION ERROR ─── -->
+            <template if:true={validationError}>
+                <div class="validation-error">
+                    <lightning-icon
+                        icon-name="utility:error"
+                        variant="error"
+                        size="x-small">
+                    </lightning-icon>
+                    <span>{validationError}</span>
+                </div>
+            </template>
+
+            <!-- ─── FORM ACTIONS ─── -->
+            <div class="form-actions">
+                <lightning-button
+                    label="Cancel"
+                    onclick={handleCancel}
+                    class="cancel-btn">
+                </lightning-button>
+
+                <lightning-button
+                    label={submitLabel}
+                    variant="brand"
+                    onclick={handleSubmit}
+                    disabled={isSubmitting}
+                    icon-name="utility:send">
+                </lightning-button>
+            </div>
+
+        </div>
+
+    </lightning-card>
+</template>

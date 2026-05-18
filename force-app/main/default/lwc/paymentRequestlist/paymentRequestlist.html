@@ -1,0 +1,83 @@
+<template>
+    <lightning-card
+        title="Payment Requests"
+        icon-name="standard:payment_gateway">
+
+        <!-- ─── HEADER ACTIONS ─── -->
+        <div slot="actions">
+            <lightning-button
+                label="New Request"
+                variant="brand"
+                icon-name="utility:add"
+                onclick={toggleForm}>
+            </lightning-button>
+        </div>
+
+        <!-- ─── PAYMENT FORM (toggleable) ─── -->
+        <template if:true={showForm}>
+            <div class="form-section">
+                <c-payment-request-form
+                    merchant-id={merchantId}
+                    onrequestcreated={handleRequestCreated}
+                    onformcancelled={handleFormCancelled}>
+                </c-payment-request-form>
+            </div>
+        </template>
+
+        <!-- ─── STATS ROW ─── -->
+        <template if:true={hasRequests}>
+            <div class="request-stats">
+                <div class="req-stat pending">
+                    <span class="req-count">{pendingCount}</span>
+                    <span class="req-label">Pending</span>
+                </div>
+                <div class="req-stat paid">
+                    <span class="req-count">{paidCount}</span>
+                    <span class="req-label">Paid</span>
+                </div>
+                <div class="req-stat failed">
+                    <span class="req-count">{failedCount}</span>
+                    <span class="req-label">Failed</span>
+                </div>
+                <div class="req-stat total-amount">
+                    <span class="req-count">₹{totalAmount}</span>
+                    <span class="req-label">Total Value</span>
+                </div>
+            </div>
+        </template>
+
+        <!-- ─── LOADING ─── -->
+        <template if:true={isLoading}>
+            <lightning-spinner
+                alternative-text="Loading..."
+                size="medium">
+            </lightning-spinner>
+        </template>
+
+        <!-- ─── REQUEST TABLE ─── -->
+        <template if:true={hasRequests}>
+            <lightning-datatable
+                key-field="Id"
+                data={requests}
+                columns={columns}
+                onrowaction={handleRowAction}
+                hide-checkbox-column>
+            </lightning-datatable>
+        </template>
+
+        <!-- ─── EMPTY STATE ─── -->
+        <template if:false={hasRequests}>
+            <template if:false={isLoading}>
+                <div class="empty-requests">
+                    <p>No payment requests yet.</p>
+                    <lightning-button
+                        label="Create First Request"
+                        variant="brand"
+                        onclick={toggleForm}>
+                    </lightning-button>
+                </div>
+            </template>
+        </template>
+
+    </lightning-card>
+</template>

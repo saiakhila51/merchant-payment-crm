@@ -1,0 +1,48 @@
+.form-container {
+    padding: 16px;
+}
+
+.merchant-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #e8f4fd;
+    border: 1px solid #0176d3;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    font-size: 0.875rem;
+    color: #032d60;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.validation-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #fff1f1;
+    border: 1px solid #ea001e;
+    border-radius: 4px;
+    color: #ea001e;
+    font-size: 0.875rem;
+    margin-bottom: 16px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e5e5;
+}

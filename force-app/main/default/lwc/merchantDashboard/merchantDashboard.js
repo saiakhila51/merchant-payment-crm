@@ -70,14 +70,24 @@ export default class MerchantDashboard extends NavigationMixin(LightningElement)
     @track merchants       = [];
     @track filteredMerchants = [];
     @track stats           = null;
+    @track selectedMerchantId = null;
     @track isLoading       = true;
     @track errorMessage    = '';
     @track searchTerm      = '';
     @track sortedBy        = 'Business_Name__c';
     @track sortedDirection = 'asc';
-
+    @track selectedFilter  = 'All'; 
     columns   = COLUMNS;
     rowOffset = 0;
+    // Combobox options — defined as getter so it's clean
+get filterOptions() {
+    return [
+        { label: 'All',       value: 'All' },
+        { label: 'Active',    value: 'Active' },
+        { label: 'Suspended', value: 'Suspended' },
+        { label: 'High Risk', value: 'HighRisk' }
+    ];
+}
 
     // ─── COMPUTED PROPERTIES ───
     // These run every render — like getters in Vue
@@ -136,15 +146,26 @@ export default class MerchantDashboard extends NavigationMixin(LightningElement)
         this.applyFilter();
     }
 
+    handleFilter(event) {
+    this.selectedFilter = event.detail.value;
+    this.applyFilter();
+}
     applyFilter() {
-        if (!this.searchTerm) {
-            // No search — show all
-            this.filteredMerchants = [...this.merchants];
-            return;
-        }
+    let result = [...this.merchants];
 
-        // Filter by name or category
-        this.filteredMerchants = this.merchants.filter(m =>
+    // ── STEP 1: Apply status/risk filter ──
+    if (this.selectedFilter !== 'All') {
+        result = result.filter(m => {
+            if (this.selectedFilter === 'HighRisk') {
+                return m.Risk_Score__c >= 70;
+            }
+            return m.Status__c === this.selectedFilter;
+        });
+    }
+
+    // ── STEP 2: Apply search on top of filtered result ──
+    if (this.searchTerm) {
+        result = result.filter(m =>
             (m.Business_Name__c &&
              m.Business_Name__c.toLowerCase()
               .includes(this.searchTerm)) ||
@@ -153,6 +174,9 @@ export default class MerchantDashboard extends NavigationMixin(LightningElement)
               .includes(this.searchTerm))
         );
     }
+
+    this.filteredMerchants = result;
+}
 
     // ─── SORT HANDLER ───
     handleSort(event) {
@@ -185,11 +209,9 @@ export default class MerchantDashboard extends NavigationMixin(LightningElement)
                 this.navigateToRecord(merchant.Id);
                 break;
             case 'payments':
-                this.showToast(
-                    'Info',
-                    `Viewing payments for ${merchant.Business_Name__c}`,
-                    'info'
-                );
+                 // Show payment list for selected merchant
+                this.selectedMerchantId = merchant.Id;
+                break;
                 // Day 6: will navigate to payment dashboard
                 break;
             case 'flag':

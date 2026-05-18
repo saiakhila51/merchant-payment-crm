@@ -30,24 +30,33 @@
         </template>
 
         <!-- ─── SEARCH BAR ─── -->
-        <div class="search-bar">
-            <lightning-input
-                type="search"
-                label="Search Merchants"
-                placeholder="Search by name or category..."
-                onchange={handleSearch}
-                variant="label-hidden">
-            </lightning-input>
+<div class="search-bar">
+    <lightning-input
+        type="search"
+        label="Search Merchants"
+        placeholder="Search by name or category..."
+        onchange={handleSearch}
+        variant="label-hidden">
+    </lightning-input>
 
-            <lightning-button
-                label="Add Merchant"
-                variant="brand"
-                icon-name="utility:add"
-                onclick={handleAddMerchant}
-                class="add-btn">
-            </lightning-button>
-        </div>
+    <!-- NEW: Filter Dropdown -->
+    <lightning-combobox
+        label="Filter"
+        value={selectedFilter}
+        options={filterOptions}
+        onchange={handleFilter}
+        variant="label-hidden"
+        placeholder="Filter by status...">
+    </lightning-combobox>
 
+    <lightning-button
+        label="Add Merchant"
+        variant="brand"
+        icon-name="utility:add"
+        onclick={handleAddMerchant}
+        class="add-btn">
+    </lightning-button>
+</div>
         <!-- ─── LOADING SPINNER ─── -->
         <template if:true={isLoading}>
             <div class="spinner-container">
@@ -84,6 +93,14 @@
                 show-row-number-column>
             </lightning-datatable>
         </template>
+        <!-- ─── PAYMENT REQUESTS SECTION ─── -->
+<template if:true={selectedMerchantId}>
+    <div class="requests-section">
+        <c-payment-request-list
+            merchant-id={selectedMerchantId}>
+        </c-payment-request-list>
+    </div>
+</template>
 
         <!-- ─── EMPTY STATE ─── -->
         <template if:false={hasMerchants}>
