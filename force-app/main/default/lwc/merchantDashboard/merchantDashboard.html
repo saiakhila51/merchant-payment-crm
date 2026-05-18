@@ -1,0 +1,107 @@
+<template>
+    <!-- Dashboard Container -->
+    <lightning-card title="Merchant Payment Dashboard" icon-name="standard:merchant">
+
+        <!-- ─── STATS HEADER ─── -->
+        <template if:true={stats}>
+            <div class="stats-container">
+
+                <div class="stat-box total">
+                    <p class="stat-number">{stats.totalMerchants}</p>
+                    <p class="stat-label">Total Merchants</p>
+                </div>
+
+                <div class="stat-box active">
+                    <p class="stat-number">{stats.activeMerchants}</p>
+                    <p class="stat-label">Active</p>
+                </div>
+
+                <div class="stat-box suspended">
+                    <p class="stat-number">{stats.suspendedMerchants}</p>
+                    <p class="stat-label">Suspended</p>
+                </div>
+
+                <div class="stat-box risk">
+                    <p class="stat-number">{stats.highRiskMerchants}</p>
+                    <p class="stat-label">High Risk</p>
+                </div>
+
+            </div>
+        </template>
+
+        <!-- ─── SEARCH BAR ─── -->
+        <div class="search-bar">
+            <lightning-input
+                type="search"
+                label="Search Merchants"
+                placeholder="Search by name or category..."
+                onchange={handleSearch}
+                variant="label-hidden">
+            </lightning-input>
+
+            <lightning-button
+                label="Add Merchant"
+                variant="brand"
+                icon-name="utility:add"
+                onclick={handleAddMerchant}
+                class="add-btn">
+            </lightning-button>
+        </div>
+
+        <!-- ─── LOADING SPINNER ─── -->
+        <template if:true={isLoading}>
+            <div class="spinner-container">
+                <lightning-spinner
+                    alternative-text="Loading merchants..."
+                    size="medium">
+                </lightning-spinner>
+            </div>
+        </template>
+
+        <!-- ─── ERROR STATE ─── -->
+        <template if:true={hasError}>
+            <div class="error-box">
+                <lightning-icon
+                    icon-name="utility:error"
+                    variant="error"
+                    size="small">
+                </lightning-icon>
+                <span>{errorMessage}</span>
+            </div>
+        </template>
+
+        <!-- ─── MERCHANT TABLE ─── -->
+        <template if:true={hasMerchants}>
+            <lightning-datatable
+                key-field="Id"
+                data={filteredMerchants}
+                columns={columns}
+                sorted-by={sortedBy}
+                sorted-direction={sortedDirection}
+                onsort={handleSort}
+                onrowaction={handleRowAction}
+                row-number-offset={rowOffset}
+                show-row-number-column>
+            </lightning-datatable>
+        </template>
+
+        <!-- ─── EMPTY STATE ─── -->
+        <template if:false={hasMerchants}>
+            <template if:false={isLoading}>
+                <div class="empty-state">
+                    <lightning-icon
+                        icon-name="standard:merchant"
+                        size="large">
+                    </lightning-icon>
+                    <p>No merchants found.</p>
+                    <lightning-button
+                        label="Add Your First Merchant"
+                        variant="brand"
+                        onclick={handleAddMerchant}>
+                    </lightning-button>
+                </div>
+            </template>
+        </template>
+
+    </lightning-card>
+</template>
