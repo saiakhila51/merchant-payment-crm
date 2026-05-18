@@ -22,6 +22,7 @@ public with sharing class PaymentRequestSelector {
                    Customer__r.Name,
                    Merchant__c,
                    CreatedDate
+
             FROM Payment_Request__c
             WHERE Merchant__c = :merchantId
             ORDER BY CreatedDate DESC
@@ -44,6 +45,7 @@ public with sharing class PaymentRequestSelector {
                    Merchant__r.Email__c,
                    Merchant__r.Business_Name__c,
                    Customer__r.Name
+
             FROM Payment_Request__c
             WHERE Status__c = 'Pending'
             AND Due_Date__c < TODAY
