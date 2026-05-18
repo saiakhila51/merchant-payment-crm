@@ -106,3 +106,81 @@ public with sharing class MerchantService {
      */
     public class MerchantServiceException extends Exception {}
 }
+/**
+ * @description Bulk risk score update — bulk safe
+ * Called from trigger handler with set of merchant Ids
+ * @param merchantIds - Set of merchant Ids to update
+ */
+public static void updateRiskScores(Set<Id> merchantIds) {
+    if (merchantIds.isEmpty()) return;
+
+    // One SOQL — get all failed counts grouped
+    // AggregateResult — advanced but important
+    Map<Id, Integer> failedCountMap = new Map<Id, Integer>();
+    Map<Id, Integer> totalCountMap  = new Map<Id, Integer>();
+
+    for (AggregateResult ar : [
+        SELECT Merchant__c, COUNT(Id) cnt
+        FROM Payment_Request__c
+        WHERE Merchant__c IN :merchantIds
+        AND Status__c = 'Failed'
+        GROUP BY Merchant__c
+    ]) {
+        failedCountMap.put(
+            (Id)ar.get('Merchant__c'),
+            (Integer)ar.get('cnt')
+        );
+    }
+
+    for (AggregateResult ar : [
+        SELECT Merchant__c, COUNT(Id) cnt
+        FROM Payment_Request__c
+        WHERE Merchant__c IN :merchantIds
+        GROUP BY Merchant__c
+    ]) {
+        totalCountMap.put(
+            (Id)ar.get('Merchant__c'),
+            (Integer)ar.get('cnt')
+        );
+    }
+
+    // Get merchant records to update
+    Map<Id, Merchant__c> merchantMap =
+        MerchantSelector.getMerchantsByIds(merchantIds);
+
+    List<Merchant__c> toUpdate = new List<Merchant__c>();
+
+    for (Id mId : merchantIds) {
+        Merchant__c merchant = merchantMap.get(mId);
+        if (merchant == null) continue;
+
+        Integer failed = failedCountMap.containsKey(mId) ?
+            failedCountMap.get(mId) : 0;
+        Integer total  = totalCountMap.containsKey(mId) ?
+            totalCountMap.get(mId) : 0;
+
+        Integer riskScore = 0;
+        if (total > 0) {
+            riskScore = ((Decimal.valueOf(failed) /
+                Decimal.valueOf(total)) * 100).intValue();
+        }
+
+        merchant.Risk_Score__c = riskScore;
+
+        if (riskScore >= HIGH_RISK_THRESHOLD) {
+            merchant.Status__c = 'Suspended';
+        }
+
+        toUpdate.add(merchant);
+    }
+
+    if (!toUpdate.isEmpty()) {
+        try {
+            update toUpdate;
+        } catch (DmlException e) {
+            System.debug(LoggingLevel.ERROR,
+                'Risk score update failed: ' + e.getMessage()
+            );
+        }
+    }
+}
